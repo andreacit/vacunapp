@@ -19,6 +19,8 @@ services:
     profiles: [demo]
     build: ./backend
     environment:
+      SPRING_PROFILES_ACTIVE: demo
+      VACUNAPP_DEMO_PASSWORD: ${VACUNAPP_DEMO_PASSWORD:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vacunapp
       SPRING_DATASOURCE_USERNAME: vacunapp
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD en .env}

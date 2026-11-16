@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>VacunApp · Expedientes</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">+</span>VacunApp</a>
+      <div class="account"><span id="correo"></span><button id="sesion" class="button secondary" hidden>Iniciar sesión</button></div>
+    </div>
+  </header>
+  <main class="shell">
+    <div class="page-heading">
+      <div><p id="demo" class="eyebrow" hidden>Datos de demostración</p><h1>Expedientes de vacunación</h1></div>
+      <button id="nueva-persona" class="button primary" hidden>Nueva persona</button>
+    </div>
+    <p id="estado" class="notice" role="status" hidden></p>
+    <div class="workspace" id="workspace" hidden>
+      <aside class="directory" aria-labelledby="titulo-directorio">
+        <h2 id="titulo-directorio">Personas</h2>
+        <form id="busqueda" class="search">
+          <label for="consulta">Nombre, CURP o folio</label>
+          <div><input type="search" id="consulta" maxlength="150"><button class="button secondary">Buscar</button></div>
+        </form>
+        <p id="resultado" class="muted" role="status"></p>
+        <ul id="personas" class="people"></ul>
+        <nav id="paginacion" class="pagination" aria-label="Páginas de resultados" hidden>
+          <button id="anterior" class="button secondary">Anterior</button>
+          <button id="siguiente" class="button secondary">Siguiente</button>
+        </nav>
+      </aside>
+      <section class="record" id="expediente" aria-labelledby="persona-nombre" hidden>
+        <header class="record-header">
+          <div><p class="eyebrow" id="folio"></p><h2 id="persona-nombre"></h2><p class="muted" id="persona-unidad"></p><p class="muted print-only" id="impresion-demo" hidden>Datos de demostración</p></div>
+          <button class="button secondary" id="imprimir">Imprimir / Guardar PDF</button>
+        </header>
+        <section class="record-section">
+          <h3>Historial de aplicaciones <span class="count" id="total-aplicadas"></span></h3>
+          <div id="historial"></div>
+        </section>
+        <section class="record-section">
+          <h3>Dosis pendientes <span class="count" id="total-pendientes"></span></h3>
+          <div id="pendientes"></div>
+        </section>
+      </section>
+      <p class="placeholder" id="sin-expediente">Selecciona una persona para consultar su expediente.</p>
+    </div>
+  </main>
+  <dialog id="login" aria-labelledby="titulo-login">
+    <form id="form-login">
+      <h2 id="titulo-login">Iniciar sesión</h2>
+      <label>Correo electrónico<input type="email" name="username" autocomplete="username" required maxlength="254"></label>
+      <label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <p id="ayuda-demo" class="muted" hidden>Cuenta de demostración: registro5@example.test</p>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancelar</button><button class="button primary">Entrar</button></div>
+    </form>
+  </dialog>
+  <dialog id="alta" aria-labelledby="titulo-alta">
+    <form id="form-alta">
+      <h2 id="titulo-alta">Nueva persona</h2>
+      <div class="form-grid">
+        <label>Nombres<input name="nombres" maxlength="100" required></label>
+        <label>Primer apellido<input name="primerApellido" maxlength="100" required></label>
+        <label>Segundo apellido (opcional)<input name="segundoApellido" maxlength="100"></label>
+        <label>CURP (opcional)<input name="curp" minlength="18" maxlength="18" pattern="[A-Za-z0-9]{18}"></label>
+        <label>Fecha de nacimiento<input type="date" name="nacimiento" required></label>
+        <label>Sexo<select name="sexo" required><option value="ND">Sin especificar</option><option value="F">Femenino</option><option value="M">Masculino</option></select></label>
+        <label>Unidad de salud<select name="idUnidad" required></select></label>
+        <label>Esquema<select name="idEsquema" required></select></label>
+      </div>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancelar</button><button class="button primary">Guardar persona</button></div>
+    </form>
+  </dialog>
+  <dialog id="dosis" aria-labelledby="titulo-dosis">
+    <form id="form-dosis">
+      <h2 id="titulo-dosis">Registrar aplicación</h2>
+      <p id="detalle-dosis" class="muted"></p>
+      <label>Fecha de aplicación<input type="date" name="fecha" required></label>
+      <label>Lote<input name="lote" maxlength="50" required></label>
+      <p class="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button type="button" class="button secondary" data-close>Cancelar</button><button class="button primary">Guardar aplicación</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
