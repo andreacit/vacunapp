@@ -1,6 +1,6 @@
 # VacunApp
 
-Base PostgreSQL reproducible y un endpoint de ejemplo en Kotlin con Spring Boot. El entorno contiene datos ficticios.
+Aplicación web de vacunación en Kotlin con Spring Boot y PostgreSQL. El perfil de demostración usa expedientes ficticios.
 
 ## Levantar la base
 
@@ -29,19 +29,46 @@ El repositorio incluye `.env.example` con valores de demostración. Cada integra
 
 En un volumen vacío, PostgreSQL ejecuta primero [el esquema](database/init/01-esquema.sql) y después [los datos de demostración](database/init/02-datos-demo.sql). El nombre de la base y el usuario son `vacunapp`. Desde la máquina local se conecta a `localhost:5433` por defecto. La contraseña se configura en `.env`.
 
-## Probar el endpoint
+## Abrir la aplicación
 
-```powershell
-docker compose --profile demo up -d --build
-docker compose logs api
-curl.exe -i http://localhost:8080/api/personas/1/historial
+Con Docker Desktop iniciado y el archivo `.env` preparado, ejecuta desde la carpeta del proyecto:
+
+```sh
+docker compose --profile demo up -d --build --wait
 ```
 
-En Linux, usa `curl` en lugar de `curl.exe`. El primer build necesita descargar las imágenes y dependencias. Si cambiaste `API_PORT`, ajusta la URL. El ID 1 tiene dos aplicaciones en la demo, el 15 existe sin aplicaciones y un ID inexistente devuelve 404. Una persona sin aplicaciones devuelve 200 con `aplicaciones: []`. Un identificador no válido devuelve 400.
+Abre [http://localhost:8080](http://localhost:8080). Si cambiaste `API_PORT`, usa ese puerto en la URL. El primer arranque descarga imágenes y dependencias.
 
-El controlador recibe la petición, el servicio dirige la consulta y el repositorio ejecuta [historial.sql](backend/src/main/resources/historial.sql) con un parámetro JDBC. El SELECT combina persona, aplicación, detalle, vacuna y unidad. La respuesta contiene `idPersona`, `nombre` y una lista de aplicaciones con `id`, `vacuna`, `numeroDosis`, `fechaAplicacion`, `lote` y `unidad`.
+- Busca por nombre, CURP o folio. El folio 1 muestra un historial completo y el folio 15 tiene dos dosis pendientes.
+- Para registrar aplicaciones o dar de alta personas, inicia sesión con `registro5@example.test` y la contraseña `VACUNAPP_DEMO_PASSWORD` de `.env`. En un `.env` anterior, copia esa línea de `.env.example` y vuelve a iniciar el servicio. El primer arranque con esa variable habilita la cuenta de demostración si todavía tiene la contraseña de marcador. Editar la variable después no cambia el hash guardado.
+- La cuenta de demostración pertenece a la unidad 5. Usa el folio 15 para probar el registro. El expediente se actualiza al guardar una aplicación.
+- Para exportar, abre el expediente, elige **Imprimir / Guardar PDF** y selecciona **Guardar como PDF** en el diálogo del navegador.
 
-Compose expone los puertos solo en la máquina local. La API se habilita con el perfil de demo y utiliza datos ficticios. Para continuar el desarrollo, el equipo implementará autenticación y autorización, permisos de BD para la cuenta de la API, los demás endpoints y la interfaz. Las reglas que cruzan tablas, como pertenencia al esquema, fechas, secuencia y cuenta de consulta, deberán validarse al incorporar operaciones de escritura.
+## API
+
+| Método | Ruta | Función |
+| --- | --- | --- |
+| GET | `/api/personas?q=&pagina=1` | Buscar expedientes activos, 20 por página |
+| GET | `/api/personas/{id}/historial` | Consultar aplicaciones registradas |
+| GET | `/api/personas/{id}/pendientes` | Consultar dosis sin aplicación y fechas del esquema asignado |
+| GET | `/api/personas/catalogos` | Obtener esquemas y unidades activas para el alta |
+| POST | `/api/personas` | Dar de alta una persona |
+| POST | `/api/personas/{id}/dosis` | Registrar una aplicación |
+| GET | `/api/sesion` | Consultar el estado de la sesión y obtener el token CSRF |
+
+La interfaz inicia sesión en `POST /login` con los campos de formulario `username` y `password`. Los POST requieren la cookie de sesión y la cabecera CSRF indicada por `/api/sesion`. Vuelve a consultar ese endpoint después de iniciar o cerrar sesión.
+
+El endpoint de historial conserva la estructura original. En modo demo puedes probarlo directamente:
+
+```sh
+curl -i http://localhost:8080/api/personas/1/historial
+```
+
+El historial del folio 15 inicialmente devuelve `200` con `aplicaciones: []`. Un folio inexistente devuelve `404` y uno no válido devuelve `400`.
+
+El registro de dosis valida la unidad, la pertenencia al esquema, la fecha de nacimiento, la secuencia, el intervalo mínimo y que la dosis no se haya registrado antes. Las fechas objetivo y de atraso provienen del esquema de demostración.
+
+Compose publica los puertos en la máquina local. En el perfil `demo` las lecturas de expedientes ficticios están abiertas. Fuera de ese perfil, un administrador puede consultar todos los expedientes, personal de salud puede consultar los de su unidad y una cuenta de consulta puede ver su expediente vinculado. El alta y el registro requieren un rol de escritura. Para usar datos reales aún falta preparar el despliegue y una cuenta de base de datos con permisos limitados.
 
 ## Verificar la base y las consultas
 
